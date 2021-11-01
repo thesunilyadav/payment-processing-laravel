@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Database\Seeders\PaymentPlatformSeeder;
+use Database\Seeders\CurrencySeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,6 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
+        $this->call([
+            CurrencySeeder::class,
+            PaymentPlatformSeeder::class,
+        ]);
+    
     }
 }

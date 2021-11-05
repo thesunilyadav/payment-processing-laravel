@@ -14,17 +14,18 @@
                         </div>
                     @endif
 
-                    <form action="" method="post">
+                    <form action="{{ route('pay') }}" method="post">
                         @csrf
 
                         <div class="row">
                             <div class="col-auto">
                                 <label> Money to pay</label>
-                                <input type="number" value="0" min="1" step="0.01" class="form-control">
+                                <input type="number" name="value" value="{{ old('value') }}" min="1" step="0.01" class="form-control">
                             </div>
                             <div class="col-auto">
                                 <label> Currency </label>
                                <select class="form-select" name="currency" id="">
+                                   <option selected value=""> Select Currency </option>
                                    @foreach ($currencies as $currency)
                                         <option value="{{$currency->iso}}"> {{$currency->iso}} ({{$currency->name}}) </option>
                                    @endforeach
@@ -43,7 +44,7 @@
                                                 data-target="#{{$platform->name}}Collapse"
                                                 data-toggle="collapse"
                                             >
-                                                <input type="radio" name="payment_platform" value="{{$platform->id}}" id="" required>
+                                                <input type="radio" name="payment_platform" value="{{$platform->id}}" id="">
                                                 <img src="{{asset($platform->image)}}" class="img-thumbnail" alt="">
                                             </label>
                                         @endforeach

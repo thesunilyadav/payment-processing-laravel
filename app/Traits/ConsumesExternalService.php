@@ -16,7 +16,7 @@ trait ConsumesExternalService
             $this->resolveAuthorization($queryParams,$formParams,$headers);
         }
 
-        $response  = $client->requset($method, $requestUrl,[
+        $response  = $client->request($method, $requestUrl,[
             $isJsonRequest ? 'json' : 'form_params' => $formParams,
             'headers' => $headers,
             'query' => $queryParams

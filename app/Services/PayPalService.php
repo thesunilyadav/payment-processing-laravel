@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Traits\ConsumesExternalService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class PayPalService
@@ -36,9 +37,35 @@ class PayPalService
     public function resolveAccessToken()
     {
         $credentials = base64_encode("{$this->clientID}:{$this->clientSecret}");
-        Log::info("Credentials");
-        Log::info($credentials);
         return "Basic {$credentials}";
+    }
+
+    public function handlePayment(Request $request)
+    {
+        $order = $this->createOrder($request->value,$request->currency);
+        $order = json_decode($order);
+        $orderlinks = collect($order->links);
+        $approve = $orderlinks->where('rel','approve')->first();
+        session()->put('approvalId',$order->id);
+
+        return redirect($approve->href);
+    }
+
+    public function handleApproval()
+    {
+        if(session()->has('approvalId'))
+        {
+            $approvalId = session()->get('approvalId');
+            $payment = json_decode($this->capturePayment($approvalId));
+            $name = $payment->payer->name->given_name;
+            $payment = $payment->purchase_units[0]->payments->captures[0]->amount;
+            $amount = $payment->value;
+            $currency = $payment->currency_code;
+
+            return redirect()->route('home')->withSuccess(['payment' => "Thanks, {$name}. We received your {$amount} {$currency} payment."]);        
+        }
+
+        return redirect()->route('home')->withErrors('Sorry, We can not proceed your payment. Please try again.');
     }
 
     public function createOrder($value, $currency)
@@ -67,6 +94,19 @@ class PayPalService
             ],
             [],
             $isJsonRequest = true
+        );
+    }
+
+    public function capturePayment($approvalId)
+    {
+        return $this->makeRequest(
+            'POST',
+            "/v2/checkout/orders/{$approvalId}/capture",
+            [],
+            [],
+            [
+                'Content-Type' => "application/json"
+            ]
         );
     }
 }

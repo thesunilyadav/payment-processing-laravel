@@ -52,7 +52,7 @@
                                     @foreach ($platforms as $platform)
                                         <div 
                                             id="{{$platform->name}}Collapse"
-                                            class="collpase"
+                                            class="collapse"
                                             data-parent="#toggler"
                                         >
                                             @includeIf('components.' . strtolower($platform->name) . '-collapse')

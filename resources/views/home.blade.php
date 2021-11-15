@@ -14,7 +14,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('pay') }}" method="post">
+                    <form action="{{ route('pay') }}" method="post" id="paymentForm">
                         @csrf
 
                         <div class="row">
@@ -63,7 +63,7 @@
                         </div>
                         <div class="row">
                             <div class="text-center">
-                                <button class="btn btn-primary mt-3" type="submit"> Pay </button>
+                                <button class="btn btn-primary mt-3" id="payBtn" type="submit"> Pay </button>
                             </div>
                         </div>
                     </form>

@@ -37,4 +37,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'stripe' => [
+        'base_uri'=>env('STRIPE_BASE_URI'),
+        'key'=>env('STRIPE_KEY'),
+        'secret'=>env('STRIPE_SECRET'),
+        'class' => App\Services\StripeService::class,
+    ],
 ];

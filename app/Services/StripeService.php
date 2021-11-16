@@ -40,12 +40,36 @@ class StripeService
 
     public function handlePayment(Request $request)
     {
-
+        $request->validate([
+            'payment_method' =>"required"
+        ]);
+        $intent = json_decode($this->createIntent($request->value,$request->currency,$request->payment_method));
+        session()->put('paymentIntentId',$intent->id);
+        return redirect()->route('approval');
     }
 
     public function handleApproval()
     {
+        if(session()->has('paymentIntentId'))
+        {
+            $paymentIntentId = session()->get('paymentIntentId');
+            $confirmation = json_decode($this->confirmPayment($paymentIntentId));
+            
+            if($confirmation->status == "requires_action"){                
+                $clientSecret = $confirmation->client_secret;
+                return view('stripe.3d-secure',compact('clientSecret'));
+            }
 
+            if($confirmation->status == "succeeded"){                
+                $name = $confirmation->charges->data[0]->billing_details->name;
+                $currency = strtoupper($confirmation->currency);
+                $amount = $confirmation->amount / $this->resolveFactor($currency);
+
+                return redirect()->route('home')->withSuccess(['payment' => "Thanks, {$name}. We received your {$amount} {$currency} payment."]);        
+            }
+        }
+
+        return redirect()->route('home')->withErrors('Sorry, We can not confirm your payment. Please try again.');
     }
 
     public function capturePayment($approvalId)
@@ -60,10 +84,21 @@ class StripeService
             '/v1/payment_intents',
             [],
             [
-                "amount" => round($value * $factor = $this->resolveFactor($currency)) / $factor,
+                "amount" => round($value * $factor = $this->resolveFactor($currency)),
                 "currency"=> strtolower($currency),
                 "payment_method" => $paymentMethod,
-                "confirmation_method" => "manual"
+                "confirmation_method" => "manual",
+                "description"=>"test desc",
+                "shipping"=>[
+                    "name" => auth()->user()->name ,
+                    "address" => [
+                        "city" => "Sacramento",
+                        "line1" => "1002 Park Avenue",
+                        "country" => "US",
+                        "postal_code" => "95814",
+                        "state" => "California",
+                    ],
+                ], 
             ]
         );
     }
@@ -72,7 +107,7 @@ class StripeService
     {
         return $this->makeRequest(
             'POST',
-            "/v1/payment_intents/{$paymentIntentId}/confirm"
+            "/v1/payment_intents/{$paymentIntentId}/confirm",
         );
     }
 

@@ -7,6 +7,7 @@ use App\Models\PaymentPlatform;
 use App\Resolvers\PaymentPlatformResolver;
 use App\Services\PayPalService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -35,7 +36,7 @@ class PaymentController extends Controller
             'currency'=>'required|exists:currencies,iso',
             'payment_platform'=>'required|exists:payment_platforms,id'
         ];
-        $request->validate($rules);
+        $request->validate($rules); 
 
         $paymentPlatform = $this->paymentPlatformResolver->resolveService($request->payment_platform);
         session()->put('paymentPlatformId',$request->payment_platform);
@@ -43,9 +44,9 @@ class PaymentController extends Controller
     }
 
     public function approval()
-    {
+    {   
         if(session()->has('paymentPlatformId')){
-            $paymentPlatform = $this->paymentPlatformResolver->resolveService(session()->has('paymentPlatformId'));
+            $paymentPlatform = $this->paymentPlatformResolver->resolveService(session()->get('paymentPlatformId'));
             return $paymentPlatform->handleApproval();
         }
         return redirect()->route('home')->withErrors("We cannot received your payment. Please try again later.");

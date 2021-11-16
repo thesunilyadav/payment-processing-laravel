@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Traits\ConsumesExternalService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class PayPalService
 {

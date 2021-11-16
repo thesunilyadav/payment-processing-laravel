@@ -20,7 +20,7 @@
                         <div class="row">
                             <div class="col-auto">
                                 <label> Money to pay</label>
-                                <input type="number" name="value" value="{{ old('value') }}" min="1" step="0.01" class="form-control">
+                                <input type="number" name="value" value="{{ old('value') == ''? 0 : old('value') }}" min="1" step="0.01" class="form-control">
                             </div>
                             <div class="col-auto">
                                 <label> Currency </label>
